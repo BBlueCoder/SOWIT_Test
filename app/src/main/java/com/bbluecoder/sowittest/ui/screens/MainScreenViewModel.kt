@@ -3,7 +3,6 @@ package com.bbluecoder.sowittest.ui.screens
 import android.location.Geocoder
 import android.location.Location
 import android.os.Build
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +28,7 @@ sealed interface PolygonUiState {
     ) : PolygonUiState
 }
 
+@Suppress("DEPRECATION")
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     private val repository: PlotsRepository

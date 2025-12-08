@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bbluecoder.sowittest.db.MPolygon
 import com.bbluecoder.sowittest.ui.screens.PolygonUiState
-import kotlin.math.exp
 
 @Composable
 fun PlotsList(modifier: Modifier = Modifier, plotsState : PolygonUiState,onItemClick : (MPolygon) -> Unit) {

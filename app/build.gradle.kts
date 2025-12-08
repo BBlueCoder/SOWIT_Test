@@ -1,3 +1,6 @@
+import com.android.build.api.variant.BuildConfigField
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,6 +8,19 @@ plugins {
     alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.ksp)
+}
+
+fun getSecret(key: String): String {
+    val secretsFile = rootProject.file("secrets.properties")
+    if (!secretsFile.exists()) {
+        throw GradleException("secrets.properties file not found at ${secretsFile.absolutePath}")
+    }
+
+    val properties = Properties()
+    secretsFile.inputStream().use { properties.load(it) }
+
+    return properties.getProperty(key)
+        ?: throw GradleException("Key $key not found in secrets.properties")
 }
 
 android {
@@ -23,9 +39,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("STORE_FILE")?: getSecret("STORE_FILE"))
+            storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: getSecret("KEY_STORE_PASSWORD")
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS") ?: getSecret("ALIAS")
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD") ?: getSecret("ALIAS_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs["release"]
             isMinifyEnabled = false
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

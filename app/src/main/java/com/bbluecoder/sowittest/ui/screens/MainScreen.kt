@@ -25,7 +25,6 @@ import com.bbluecoder.sowittest.findActivity
 import com.bbluecoder.sowittest.hasPermission
 import com.bbluecoder.sowittest.openAppSettings
 import com.bbluecoder.sowittest.ui.screens.Constants.COARSE_LOCATION
-import com.bbluecoder.sowittest.ui.screens.Constants.colorsPallet
 import com.bbluecoder.sowittest.ui.screens.mainScreenComponents.LocationDialogPermission
 import com.bbluecoder.sowittest.ui.screens.mainScreenComponents.LocationPermissionDescriptionDialog
 import com.bbluecoder.sowittest.ui.screens.mainScreenComponents.Map

@@ -7,7 +7,6 @@ import androidx.room.Transaction
 import com.bbluecoder.sowittest.db.entities.PolygonEntity
 import com.bbluecoder.sowittest.db.entities.PolygonPointEntity
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Singleton
 
 
 @Dao

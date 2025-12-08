@@ -34,6 +34,18 @@ jobs:
       run: |
         echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > secrets.properties
 
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > app/upload-keystore.jks
+
+    - name: Set Signing Environment Variables
+      run: |
+        echo "STORE_FILE=$GITHUB_WORKSPACE/app/upload-keystore.jks" >> $GITHUB_ENV
+        echo "SIGNING_STORE_PASSWORD=${{ secrets.SIGNING_STORE_PASSWORD }}" >> $GITHUB_ENV
+        echo "SIGNING_KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}" >> $GITHUB_ENV
+        echo "SIGNING_KEY_PASSWORD=${{ secrets.SIGNING_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+
     - name: Change permission of gradlew script
       run: chmod +x gradlew
 
