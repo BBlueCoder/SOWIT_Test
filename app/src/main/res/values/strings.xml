@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SOWIT Test</string>
+    <string name="info_about_location_permission">Info About Location Permission</string>
+    <string name="location_permission_required">Location Permission Required</string>
+    <string name="info_location_permission_description">For a better experience, this app needs access to your device\'s location. Please grant the permission.</string>
+</resources>
