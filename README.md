@@ -2,7 +2,7 @@
 
 A simple app that allows users to draw polygons on Google Maps and save them to local storage.
 
-Check the release page to download a release apk. 
+Check the [release page](https://github.com/BBlueCoder/SOWIT_Test/releases/tag/v1.0.0) to download a release apk. 
 
 ## Tech Stack and Android APIs used
 
