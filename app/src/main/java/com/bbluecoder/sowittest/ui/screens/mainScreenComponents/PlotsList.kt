@@ -4,11 +4,15 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -33,53 +37,96 @@ import com.bbluecoder.sowittest.db.MPolygon
 import com.bbluecoder.sowittest.ui.screens.PolygonUiState
 
 @Composable
-fun PlotsList(modifier: Modifier = Modifier, plotsState : PolygonUiState,onItemClick : (MPolygon) -> Unit) {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+fun PlotsList(
+    modifier: Modifier = Modifier,
+    plotsState: PolygonUiState,
+    expanded: Boolean,
+    isLandscape: Boolean,
+    onArrowClick : () -> Unit,
+    onItemClick: (MPolygon) -> Unit
+) {
+    if (isLandscape) {
+        Column(
+            modifier = modifier
+                .width(150.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("All Plots")
 
-            IconButton(onClick = { expanded = !expanded }) {
-                Icon(
-                    imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp
-                    else Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "Arrow Icon Button"
+            PlotsLazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                plotsState = plotsState,
+                onItemClick = onItemClick
+            )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("All Plots")
+
+                IconButton(onClick = onArrowClick) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp
+                        else Icons.Rounded.KeyboardArrowDown,
+                        contentDescription = "Arrow Icon Button"
+                    )
+                }
+            }
+
+            if (expanded) {
+                PlotsLazyColumn(
+                    plotsState = plotsState,
+                    onItemClick = onItemClick
                 )
             }
         }
 
-        if(expanded) {
-            if(plotsState is PolygonUiState.Success) {
-                val plots = plotsState.polygons
-                LazyColumn {
-                    items(items = plots,key = {it.polygon.id}) {
-                        PlotItem(polygon = it, onItemClick = onItemClick)
-                    }
-                }
+    }
+}
+
+@Composable
+fun PlotsLazyColumn(
+    modifier: Modifier = Modifier,
+    plotsState: PolygonUiState,
+    onItemClick: (MPolygon) -> Unit
+) {
+    if (plotsState is PolygonUiState.Success) {
+        val plots = plotsState.polygons
+        LazyColumn(modifier = modifier) {
+            items(items = plots, key = { it.polygon.id }) {
+                PlotItem(polygon = it, onItemClick = onItemClick)
             }
         }
     }
 }
 
 @Composable
-private fun PlotItem(modifier: Modifier = Modifier, polygon : MPolygon, onItemClick : (MPolygon) -> Unit) {
+private fun PlotItem(
+    modifier: Modifier = Modifier,
+    polygon: MPolygon,
+    onItemClick: (MPolygon) -> Unit
+) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable {
-            onItemClick(polygon)
-        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .clickable {
+                onItemClick(polygon)
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Log.d("PlotItem","clr from db : ${polygon.polygon.color}")
+        Log.d("PlotItem", "clr from db : ${polygon.polygon.color}")
         Icon(
             Icons.Filled.Circle,
             "Leading Icon of Color",

@@ -1,5 +1,6 @@
 package com.bbluecoder.sowittest.ui.screens
 
+import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.location.Location
 import android.os.Build
@@ -10,6 +11,7 @@ import com.bbluecoder.sowittest.data.PlotsRepository
 import com.bbluecoder.sowittest.db.MPolygon
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +65,16 @@ class MainScreenViewModel @Inject constructor(
     var polygonColor = MutableStateFlow(Constants.colorsPallet.random())
         private set
 
+    var showPolygonPointsError = MutableStateFlow(false)
+        private set
+
+    var bounds = MutableStateFlow<LatLngBounds?>(null)
+        private set
+
+    var isPolygonAnimating = false
+        private set
+
+
     val uiState: StateFlow<PolygonUiState> =
         repository.getPolygons().map { polygons ->
             PolygonUiState.Success(polygons)
@@ -92,27 +104,44 @@ class MainScreenViewModel @Inject constructor(
     }
 
     fun handlePlotItemClick(polygon: MPolygon) {
+        if(isDrawing.value)
+            return
+
         val points = polygon.points.map { LatLng(it.lat, it.lng) }
-        val plotCenter = calculatePolygonCenter(points)
         _points.value = points
         isMapCameraAnimationEnabled.value = true
-        cameraTarget.value = plotCenter
         polygonColor.value = polygon.polygon.color
+        isPolygonAnimating = true
+        bounds.value = calculateBounds(points)
     }
 
+    @SuppressLint("MissingPermission")
     fun fetchLocation() {
+        isPolygonAnimating = false
         isMapCameraAnimationEnabled.value = false
         cameraTarget.value = LatLng(0.0, 0.0)
-        locationClient?.lastLocation?.addOnSuccessListener { location ->
-            isMapCameraAnimationEnabled.value = true
-            cameraTarget.value = LatLng(location.latitude, location.longitude)
+        isMapCameraAnimationEnabled.value = true
+        if(locationClient == null) {
+            cameraTarget.value = defaultMapCameraPosition
+        }else {
+            locationClient?.lastLocation?.addOnSuccessListener { location ->
+                isMapCameraAnimationEnabled.value = true
+                cameraTarget.value = LatLng(location.latitude, location.longitude)
+            }
         }
     }
 
     fun drawPolygon() {
+        if (_points.value.size < 3){
+            showPolygonPointsError.value = true
+            return
+        }
         isDrawing.value = false
-        if (_points.value.isNotEmpty())
-            showPolygonDetailsDialog.value = true
+        showPolygonDetailsDialog.value = true
+    }
+
+    fun hidePolygonPointsError() {
+        showPolygonPointsError.value = false
     }
 
     fun cancelDrawing() {
@@ -137,6 +166,7 @@ class MainScreenViewModel @Inject constructor(
         _points.value = emptyList()
         isDrawing.value = true
         isPolygonLocationRetrieved = false
+        polygonColor.value = Constants.colorsPallet.random()
         polygonLocationCity = ""
     }
 
@@ -182,14 +212,11 @@ class MainScreenViewModel @Inject constructor(
         }
     }
 
-    private fun calculatePolygonCenter(points: List<LatLng>): LatLng {
-        // Simple logic to calculate Polygon Center by taking average of latitudes and longitudes
-        val latitudeSum = points.sumOf { it.latitude }
-        val longitudeSum = points.sumOf { it.longitude }
-
-        val averageLatitude = latitudeSum / points.size
-        val averageLongitude = longitudeSum / points.size
-
-        return LatLng(averageLatitude, averageLongitude)
+    private fun calculateBounds(points: List<LatLng>): LatLngBounds {
+        val builder = LatLngBounds.builder()
+        points.forEach {
+            builder.include(it)
+        }
+        return builder.build()
     }
 }
